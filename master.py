@@ -55,7 +55,7 @@ def twitter_event_received():
         for message in event_json["direct_message_events"]:
             # Send this message to chatbot workers
             try:
-                requests.post(url=Configuration.CHATBOT_WORKER_URL, data=message)
+                requests.post(url=Configuration.CHATBOT_WORKER_URL, data=json.dumps(message))
             except Exception as excep:
                 # log error here
                 _LOGGER.error(
@@ -67,7 +67,7 @@ def twitter_event_received():
         for tweet in event_json["tweet_create_events"]:
             # Send this tweet to tweetbot workers
             try:
-                requests.post(url=Configuration.TWEETBOT_WORKER_URL, data=tweet)
+                requests.post(url=Configuration.TWEETBOT_WORKER_URL, data=json.dumps(tweet))
             except Exception as excep:
                 # log error here
                 _LOGGER.error(
