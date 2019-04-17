@@ -1,13 +1,29 @@
 import hmac, base64, hashlib
 import logging
+import os
 import json
+import requests
 from flask import Flask, request
 from http import HTTPStatus
 
 
 from configuration import Configuration
 
+# Set up logging
+_LOGGER = logging.getLogger(__name__)
+if os.getenv("FLT_DEBUG_MODE", "False") == "True":
+    logging_level = logging.DEBUG  # Enable Debug mode
+else:
+    logging_level = logging.INFO
+# Log record format
+logging.basicConfig(format="%(asctime)s:%(levelname)s: %(message)s", level=logging_level)
+
 app = Flask(__name__)
+
+
+@app.route("/")
+def default_page():
+    return "Functional"
 
 
 # crc validation for the twitter account activity api webhook
@@ -35,12 +51,29 @@ def twitter_event_received():
     # Maybe validate the requests here (Check if they are actually from twitter)
 
     # Send mentions to tweetbot workers, Send dms to chatbot workers
-
     if "direct_message_events" in event_json.keys():
         for message in event_json["direct_message_events"]:
-            # Send these to chatbot workers
-            pass
-    #         loop.run_until_complete(process_message(message))
+            # Send this message to chatbot workers
+            try:
+                requests.post(url=Configuration.CHATBOT_WORKER_URL, data=message)
+            except Exception as excep:
+                # log error here
+                _LOGGER.error(
+                    "Error %s while processing the following message %s ", str(excep), str(message)
+                )
+                # raise excep # don't raise when in production
+
+    if "tweet_create_events" in event_json.keys():
+        for tweet in event_json["tweet_create_events"]:
+            # Send this tweet to tweetbot workers
+            try:
+                requests.post(url=Configuration.TWEETBOT_WORKER_URL, data=tweet)
+            except Exception as excep:
+                # log error here
+                _LOGGER.error(
+                    "Error %s while processing the following tweet %s ", str(excep), str(tweet)
+                )
+                # raise excep # don't raise when in production
 
     return ("", HTTPStatus.OK)
 
