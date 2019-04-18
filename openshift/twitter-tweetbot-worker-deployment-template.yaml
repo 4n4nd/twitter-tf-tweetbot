@@ -2,13 +2,13 @@ apiVersion: v1
 kind: Template
 
 metadata:
-  name: twitterbot-master-deployment-template
+  name: twitter-tensorflow-bot-template
   annotations:
     description: "This is a bot to connect tensorflow model serving to a twitter bot"
     openshift.io/display-name: "Twitter Tensorflow Bot"
     version: 0.1.0
     tags: twitter,tensorflow,serving
-    template.openshift.io/documentation-url: https://github.com/4n4nd/twitter-tf-tweetbot
+    template.openshift.io/documentation-url: https://github.com/4n4nd/twiitter-tf-chatbot
   labels:
     application: ${APPLICATION_NAME}
     template: ${APPLICATION_NAME}-template
@@ -16,11 +16,11 @@ metadata:
 
 parameters:
 - description: The name for application
-  value: 'twitterbot-master-demo'
+  value: 'twitter-tweetbot-demo'
   name: APPLICATION_NAME
   required: true
 - name: GIT_URI
-  value: https://github.com/4n4nd/twitter-tf-tweetbot.git
+  value: https://github.com/4n4nd/twiitter-tf-chatbot.git
   required: true
 - name: FLT_DEBUG_MODE
   description: Enable verbose log for debugging
@@ -38,11 +38,9 @@ parameters:
 - name: TWITTER_ACCESS_TOKEN_SECRET
   description: Access Token Secret for the twitter account being used
   required: true
-- name: CHATBOT_WORKER_URL
-  value: http://$(TWITTER_CHATBOT_DEMO_SERVICE_SERVICE_HOST):$(TWITTER_CHATBOT_DEMO_SERVICE_SERVICE_PORT)
-  required: true
-- name: TWEETBOT_WORKER_URL
-  value: http://$(TWITTER_TWEETBOT_DEMO_SERVICE_SERVICE_HOST):$(TWITTER_TWEETBOT_DEMO_SERVICE_SERVICE_PORT)
+- name: TF_SERVER_URL
+  description: url for the tensorflow model serving REST API
+  value: http://$(TENSORFLOW_MODEL_SERVING_SERVICE_SERVICE_HOST):$(TENSORFLOW_MODEL_SERVING_SERVICE_SERVICE_PORT)
   required: true
 
 objects:
@@ -83,7 +81,7 @@ objects:
       sourceStrategy:
         env:
         - name: APP_FILE
-          value: 'master.py'
+          value: 'worker_tweetbot.py'
         - name: GIT_SSL_NO_VERIFY
           value: 'true'
         - name: ENABLE_PIPENV
@@ -126,10 +124,8 @@ objects:
             value: "${TWITTER_ACCESS_TOKEN}"
           - name: TWITTER_ACCESS_TOKEN_SECRET
             value: "${TWITTER_ACCESS_TOKEN_SECRET}"
-          - name: CHATBOT_WORKER_URL
-            value: "${CHATBOT_WORKER_URL}"
-          - name: TWEETBOT_WORKER_URL
-            value: "${TWEETBOT_WORKER_URL}"
+          - name: TF_SERVER_URL
+            value: "${TF_SERVER_URL}"
           - name: FLT_DEBUG_MODE
             value: "${FLT_DEBUG_MODE}"
           image: ${APPLICATION_NAME}
@@ -178,7 +174,7 @@ objects:
     labels:
       app: ${APPLICATION_NAME}
   spec:
-    host: twitterbot-master.apps.plabs-38ff.openshiftworkshop.com
+    host: tweetbot.apps.plabs-38ff.openshiftworkshop.com
     to:
       kind: Service
       name: ${APPLICATION_NAME}-service

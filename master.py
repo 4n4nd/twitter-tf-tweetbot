@@ -1,11 +1,12 @@
 import hmac, base64, hashlib
 import logging
 import os
+import asyncio
 import json
 import requests
 from flask import Flask, request
 from http import HTTPStatus
-
+from peony import PeonyClient
 
 from configuration import Configuration
 
@@ -19,6 +20,23 @@ else:
 logging.basicConfig(format="%(asctime)s:%(levelname)s: %(message)s", level=logging_level)
 
 app = Flask(__name__)
+
+# create the client using the api keys
+CLIENT = PeonyClient(
+    consumer_key=Configuration.CONSUMER_KEY,
+    consumer_secret=Configuration.CONSUMER_SECRET,
+    access_token=Configuration.ACCESS_TOKEN,
+    access_token_secret=Configuration.ACCESS_TOKEN_SECRET,
+)
+CURRENT_USER_ID = None
+loop = asyncio.get_event_loop()
+
+
+async def getting_started():
+    """This is just a demo of an async API call."""
+    user = await CLIENT.user
+    print("I am @{0}".format(user.screen_name))
+    return user
 
 
 @app.route("/")
@@ -53,30 +71,45 @@ def twitter_event_received():
     # Send mentions to tweetbot workers, Send dms to chatbot workers
     if "direct_message_events" in event_json.keys():
         for message in event_json["direct_message_events"]:
-            # Send this message to chatbot workers
-            try:
-                requests.post(url=Configuration.CHATBOT_WORKER_URL, data=json.dumps(message))
-            except Exception as excep:
-                # log error here
-                _LOGGER.error(
-                    "Error %s while processing the following message %s ", str(excep), str(message)
-                )
-                # raise excep # don't raise when in production
+            if (
+                message["type"] == "message_create"  # Check if new message
+                and str(message["message_create"]["sender_id"])
+                != CURRENT_USER_ID  # Check if its your own message
+            ):
+                # Send this message to chatbot workers
+                try:
+                    requests.post(url=Configuration.CHATBOT_WORKER_URL, data=json.dumps(message))
+                except Exception as excep:
+                    # log error here
+                    _LOGGER.error(
+                        "Error %s while processing the following message %s ",
+                        str(excep),
+                        str(message),
+                    )
+                    # raise excep # don't raise when in production
 
     if "tweet_create_events" in event_json.keys():
         for tweet in event_json["tweet_create_events"]:
-            # Send this tweet to tweetbot workers
-            try:
-                requests.post(url=Configuration.TWEETBOT_WORKER_URL, data=json.dumps(tweet))
-            except Exception as excep:
-                # log error here
-                _LOGGER.error(
-                    "Error %s while processing the following tweet %s ", str(excep), str(tweet)
-                )
-                # raise excep # don't raise when in production
+            user_mentions_list = []
+            for user_mention in tweet["entities"]["user_mentions"]:
+                user_mentions_list.append(user_mention["id_str"])
+
+            # Reply to tweet only if the bot was mentioned
+            if str(CURRENT_USER_ID) in user_mentions_list:
+                # Send this tweet to tweetbot workers
+                try:
+                    requests.post(url=Configuration.TWEETBOT_WORKER_URL, data=json.dumps(tweet))
+                except Exception as excep:
+                    # log error here
+                    _LOGGER.error(
+                        "Error %s while processing the following tweet %s ", str(excep), str(tweet)
+                    )
+                    # raise excep # don't raise when in production
 
     return ("", HTTPStatus.OK)
 
 
 if __name__ == "__main__":
+    CURRENT_USER_ID = loop.run_until_complete(getting_started())["id_str"]
+    print(CURRENT_USER_ID)
     app.run(host="0.0.0.0", debug=True, port=8080)
