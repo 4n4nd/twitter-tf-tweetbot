@@ -4,9 +4,14 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
+peony-twitter = {extras = ["all"], version = "*"}
 requests = "*"
 flask = "*"
 TwitterAPI = "*"
+numpy = "*"
+tornado = "*"
+pillow = "*"
+requests_oauthlib = "*"
 
 [dev-packages]
 pylint = "*"
