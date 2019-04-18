@@ -40,7 +40,7 @@ parameters:
   required: true
 - name: TF_SERVER_URL
   description: url for the tensorflow model serving REST API
-  value: http://$(TENSORFLOW_MODEL_SERVING_SERVICE_SERVICE_HOST):$(TENSORFLOW_MODEL_SERVING_SERVICE_SERVICE_PORT)
+  value: http://$(TENSORFLOW_MODEL_SERVING_SERVICE_SERVICE_HOST):$(TENSORFLOW_MODEL_SERVING_SERVICE_SERVICE_PORT)/v1/models/saved_model:predict
   required: true
 
 objects:
@@ -133,11 +133,11 @@ objects:
           name: ${APPLICATION_NAME}
           resources:
             requests:
-              memory: 1Gi
-              cpu: "2"
+              memory: 500Mi
+              cpu: "1"
             limits:
-              memory: 2Gi
-              cpu: "2"
+              memory: 1Gi
+              cpu: "1"
           terminationMessagePath: /dev/termination-log
         dnsPolicy: ClusterFirst
         restartPolicy: Always
