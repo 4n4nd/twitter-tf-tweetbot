@@ -8,7 +8,7 @@ metadata:
     openshift.io/display-name: "Twitter Tensorflow Bot"
     version: 0.1.0
     tags: twitter,tensorflow,serving
-    template.openshift.io/documentation-url: https://github.com/4n4nd/twiitter-tf-chatbot
+    template.openshift.io/documentation-url: https://github.com/4n4nd/twiitter-tf-tweetbot
   labels:
     application: ${APPLICATION_NAME}
     template: ${APPLICATION_NAME}-template
@@ -20,7 +20,7 @@ parameters:
   name: APPLICATION_NAME
   required: true
 - name: GIT_URI
-  value: https://github.com/4n4nd/twiitter-tf-chatbot.git
+  value: https://github.com/4n4nd/twitter-tf-tweetbot.git
   required: true
 - name: FLT_DEBUG_MODE
   description: Enable verbose log for debugging
