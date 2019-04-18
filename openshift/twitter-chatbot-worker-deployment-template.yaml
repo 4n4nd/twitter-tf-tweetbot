@@ -2,9 +2,9 @@ apiVersion: v1
 kind: Template
 
 metadata:
-  name: twitter-tensorflow-bot-template
+  name: twitter-chatbot-worker-deployment-template
   annotations:
-    description: "This is a bot to connect tensorflow model serving to a twitter bot"
+    description: "This is a bot to connect tensorflow model serving to a twitter bot [chatbot-worker]"
     openshift.io/display-name: "Twitter Tensorflow Bot"
     version: 0.1.0
     tags: twitter,tensorflow,serving
@@ -16,7 +16,7 @@ metadata:
 
 parameters:
 - description: The name for application
-  value: 'twitter-chatbot-demo'
+  value: 'twitter-chatbot-worker'
   name: APPLICATION_NAME
   required: true
 - name: GIT_URI
@@ -24,7 +24,7 @@ parameters:
   required: true
 - name: FLT_DEBUG_MODE
   description: Enable verbose log for debugging
-  value: '0'
+  value: 'False'
   required: false
 - name: TWITTER_CONSUMER_KEY
   description: Consumer key for the twitter account being used

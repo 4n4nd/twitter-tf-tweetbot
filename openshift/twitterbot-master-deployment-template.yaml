@@ -4,7 +4,7 @@ kind: Template
 metadata:
   name: twitterbot-master-deployment-template
   annotations:
-    description: "This is a bot to connect tensorflow model serving to a twitter bot"
+    description: "This is a bot to connect tensorflow model serving to a twitter bot [master]"
     openshift.io/display-name: "Twitter Tensorflow Bot"
     version: 0.1.0
     tags: twitter,tensorflow,serving
@@ -16,7 +16,7 @@ metadata:
 
 parameters:
 - description: The name for application
-  value: 'twitterbot-master-demo'
+  value: 'twitterbot-master'
   name: APPLICATION_NAME
   required: true
 - name: GIT_URI
@@ -39,10 +39,10 @@ parameters:
   description: Access Token Secret for the twitter account being used
   required: true
 - name: CHATBOT_WORKER_URL
-  value: http://$(TWITTER_CHATBOT_DEMO_SERVICE_SERVICE_HOST):$(TWITTER_CHATBOT_DEMO_SERVICE_SERVICE_PORT)
+  value: http://$(TWITTER_CHATBOT_WORKER_SERVICE_SERVICE_HOST):$(TWITTER_CHATBOT_WORKER_SERVICE_SERVICE_PORT)
   required: true
 - name: TWEETBOT_WORKER_URL
-  value: http://$(TWITTER_TWEETBOT_DEMO_SERVICE_SERVICE_HOST):$(TWITTER_TWEETBOT_DEMO_SERVICE_SERVICE_PORT)
+  value: http://$(TWITTER_TWEETBOT_WORKER_SERVICE_SERVICE_HOST):$(TWITTER_TWEETBOT_WORKER_SERVICE_SERVICE_PORT)
   required: true
 
 objects:
