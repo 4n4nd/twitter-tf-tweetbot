@@ -54,7 +54,7 @@ async def post_tweet_reply(to_tweet_id, reply_string):
 async def getting_started():
     """This is just a demo of an async API call."""
     user = await CLIENT.user
-    _LOGGER.info("I am @{0}".format(user.screen_name))
+    _LOGGER.info("I am @%s", str(user.screen_name))
     return user
 
 

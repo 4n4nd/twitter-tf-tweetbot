@@ -35,7 +35,7 @@ loop = asyncio.get_event_loop()
 async def getting_started():
     """This is just a demo of an async API call."""
     user = await CLIENT.user
-    print("I am @{0}".format(user.screen_name))
+    _LOGGER.info("I am @%s", str(user.screen_name))
     return user
 
 
@@ -57,15 +57,15 @@ def twitter_crc_validation():
     )
     digested = base64.b64encode(validation.digest())
     response = {"response_token": "sha256=" + format(str(digested)[2:-1])}
-    print("responding to CRC call")
+    _LOGGER.info("responding to CRC call")
     return json.dumps(response)
 
 
 @app.route("/webhook", methods=["POST"])
 def twitter_event_received():
     event_json = request.get_json()
-    print(event_json)
-
+    _LOGGER.debug("Twitter Event Received: %s ", str(event_json))
+    response_string = "None"
     # Maybe validate the requests here (Check if they are actually from twitter)
 
     # Send mentions to tweetbot workers, Send dms to chatbot workers
@@ -78,7 +78,11 @@ def twitter_event_received():
             ):
                 # Send this message to chatbot workers
                 try:
-                    requests.post(url=Configuration.CHATBOT_WORKER_URL, data=json.dumps(message))
+                    response = requests.post(
+                        url=Configuration.CHATBOT_WORKER_URL, data=json.dumps(message)
+                    )
+                    response_string = response.text
+                    response.raise_for_status()
                 except Exception as excep:
                     # log error here
                     _LOGGER.error(
@@ -86,6 +90,7 @@ def twitter_event_received():
                         str(excep),
                         str(message),
                     )
+                    return ("{0}".format(response_string), HTTPStatus.INTERNAL_SERVER_ERROR)
                     # raise excep # don't raise when in production
 
     if "tweet_create_events" in event_json.keys():
@@ -98,18 +103,22 @@ def twitter_event_received():
             if str(CURRENT_USER_ID) in user_mentions_list:
                 # Send this tweet to tweetbot workers
                 try:
-                    requests.post(url=Configuration.TWEETBOT_WORKER_URL, data=json.dumps(tweet))
+                    response = requests.post(
+                        url=Configuration.TWEETBOT_WORKER_URL, data=json.dumps(tweet)
+                    )
+                    response.raise_for_status()
                 except Exception as excep:
                     # log error here
                     _LOGGER.error(
                         "Error %s while processing the following tweet %s ", str(excep), str(tweet)
                     )
+                    return ("{0}".format(response_string), HTTPStatus.INTERNAL_SERVER_ERROR)
                     # raise excep # don't raise when in production
 
-    return ("", HTTPStatus.OK)
+    return ("{0}".format(response_string), HTTPStatus.OK)
 
 
 if __name__ == "__main__":
     CURRENT_USER_ID = loop.run_until_complete(getting_started())["id_str"]
     print(CURRENT_USER_ID)
-    app.run(host="0.0.0.0", debug=True, port=8080)
+    app.run(host="0.0.0.0", debug=False, port=8080)

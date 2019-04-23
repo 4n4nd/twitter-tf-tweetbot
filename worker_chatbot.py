@@ -1,3 +1,4 @@
+import os
 import asyncio
 import logging
 import tornado.ioloop
@@ -6,11 +7,18 @@ import tornado
 from requests_oauthlib import OAuth1
 from peony import PeonyClient
 
+
 import tf_connect
 from configuration import Configuration
 
 # Set up logging
 _LOGGER = logging.getLogger(__name__)
+if os.getenv("FLT_DEBUG_MODE", "False") == "True":
+    logging_level = logging.DEBUG  # Enable Debug mode
+else:
+    logging_level = logging.INFO
+# Log record format
+logging.basicConfig(format="%(asctime)s:%(levelname)s: %(message)s", level=logging_level)
 
 # create the client using the api keys
 CLIENT = PeonyClient(
@@ -49,7 +57,7 @@ def generate_message_response(to_user_id, message_string: str):
 async def getting_started():
     """This is just a demo of an async API call."""
     user = await CLIENT.user
-    _LOGGER.info("I am @{0}".format(user.screen_name))
+    _LOGGER.info("I am @%s", str(user.screen_name))
     return user
 
 
@@ -91,7 +99,7 @@ class MainHandler(tornado.web.RequestHandler):
             # reply to the message
             reply_json = generate_message_response(sender_id, reply_string)
             response = await CLIENT.api.direct_messages.events.new.post(_json=reply_json)
-            print(response)
+            _LOGGER.debug("Response: %s", str(response))
 
         self.write(reply_string)
 
