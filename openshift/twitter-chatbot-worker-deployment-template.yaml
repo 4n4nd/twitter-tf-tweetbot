@@ -42,6 +42,10 @@ parameters:
   description: url for the tensorflow model serving REST API
   value: http://$(TENSORFLOW_MODEL_SERVING_SERVICE_SERVICE_HOST):$(TENSORFLOW_MODEL_SERVING_SERVICE_SERVICE_PORT)/v1/models/saved_model:predict
   required: true
+- name: FLT_LOAD_TESTING_MODE
+  description: If set to True, it won't send any requests to twitter, but will still run the whole tf loop
+  value: 'False'
+  required: false
 
 objects:
 - apiVersion: v1
@@ -128,6 +132,8 @@ objects:
             value: "${TF_SERVER_URL}"
           - name: FLT_DEBUG_MODE
             value: "${FLT_DEBUG_MODE}"
+          - name: FLT_LOAD_TESTING_MODE
+            value: "${FLT_LOAD_TESTING_MODE}"
           image: ${APPLICATION_NAME}
           imagePullPolicy: IfNotPresent
           name: ${APPLICATION_NAME}

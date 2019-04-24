@@ -44,6 +44,10 @@ parameters:
 - name: TWEETBOT_WORKER_URL
   value: http://$(TWITTER_TWEETBOT_WORKER_SERVICE_SERVICE_HOST):$(TWITTER_TWEETBOT_WORKER_SERVICE_SERVICE_PORT)
   required: true
+- name: FLT_LOAD_TESTING_MODE
+  description: If set to True, it won't send any requests to twitter, but will still run the whole tf loop
+  value: 'False'
+  required: false
 
 objects:
 - apiVersion: v1
@@ -132,6 +136,8 @@ objects:
             value: "${TWEETBOT_WORKER_URL}"
           - name: FLT_DEBUG_MODE
             value: "${FLT_DEBUG_MODE}"
+          - name: FLT_LOAD_TESTING_MODE
+            value: "${FLT_LOAD_TESTING_MODE}"
           image: ${APPLICATION_NAME}
           imagePullPolicy: IfNotPresent
           name: ${APPLICATION_NAME}
