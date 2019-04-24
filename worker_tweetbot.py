@@ -1,6 +1,7 @@
 import asyncio
 import os
 import logging
+import time
 import tornado.ioloop
 import tornado.web
 import tornado
@@ -19,6 +20,13 @@ else:
     logging_level = logging.INFO
 # Log record format
 logging.basicConfig(format="%(asctime)s:%(levelname)s: %(message)s", level=logging_level)
+
+LOAD_TESTING_MODE = False
+# If set to true, will not send requests to twitter (to send messages or tweets)
+# it will still receive requests and run the whole tensorflow loop
+if os.getenv("FLT_LOAD_TESTING_MODE", "False") == "True":
+    LOAD_TESTING_MODE = True
+
 # create the client using the api keys
 CLIENT = PeonyClient(
     consumer_key=Configuration.CONSUMER_KEY,
@@ -94,7 +102,16 @@ class MainHandler(tornado.web.RequestHandler):
                     image_url,
                     reply_string,
                 )
-                await post_tweet_reply(tweet_id, reply_string)
+                # if load testing don't send the message to twitter
+                if LOAD_TESTING_MODE:
+                    # Simulate the dalay you would get after you post the tweet
+                    await asyncio.sleep(0.3)
+                else:
+                    start = time.time()
+                    await post_tweet_reply(tweet_id, reply_string)
+                    end = time.time()
+                    _LOGGER.debug("Request took %s seconds", str(end - start))
+
         self.write(reply_string)
 
 
