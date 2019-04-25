@@ -44,6 +44,7 @@ AUTH = OAuth1(
 TF_SERVER_URL = Configuration.TF_SERVER_URL
 
 CURRENT_USER_ID = None
+MESSAGE_REQUEST_COUNT = 0
 
 loop = asyncio.get_event_loop()
 
@@ -116,7 +117,9 @@ class MainHandler(tornado.web.RequestHandler):
                 end = time.time()
                 _LOGGER.debug("Response: %s", str(response))
                 _LOGGER.debug("Request took %s seconds", str(end - start))
-
+            global MESSAGE_REQUEST_COUNT
+            MESSAGE_REQUEST_COUNT += 1
+            _LOGGER.info("Processed %s messages", str(MESSAGE_REQUEST_COUNT))
         self.write(reply_string)
 
 

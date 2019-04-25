@@ -28,7 +28,11 @@ CLIENT = PeonyClient(
     access_token=Configuration.ACCESS_TOKEN,
     access_token_secret=Configuration.ACCESS_TOKEN_SECRET,
 )
+
 CURRENT_USER_ID = None
+MESSAGE_REQUEST_COUNT = 0
+TWEET_REQUEST_COUNT = 0
+
 loop = asyncio.get_event_loop()
 
 
@@ -76,6 +80,8 @@ def twitter_event_received():
                 and str(message["message_create"]["sender_id"])
                 != CURRENT_USER_ID  # Check if its your own message
             ):
+                global MESSAGE_REQUEST_COUNT
+                MESSAGE_REQUEST_COUNT += 1
                 # Send this message to chatbot workers
                 try:
                     response = requests.post(
@@ -83,6 +89,7 @@ def twitter_event_received():
                     )
                     response_string = response.text
                     response.raise_for_status()
+                    _LOGGER.info("Processed %s messages", str(MESSAGE_REQUEST_COUNT))
                 except Exception as excep:
                     # log error here
                     _LOGGER.error(
@@ -101,12 +108,15 @@ def twitter_event_received():
 
             # Reply to tweet only if the bot was mentioned
             if str(CURRENT_USER_ID) in user_mentions_list:
+                global TWEET_REQUEST_COUNT
+                TWEET_REQUEST_COUNT += 1
                 # Send this tweet to tweetbot workers
                 try:
                     response = requests.post(
                         url=Configuration.TWEETBOT_WORKER_URL, data=json.dumps(tweet)
                     )
                     response.raise_for_status()
+                    _LOGGER.info("Processed %s tweets", str(TWEET_REQUEST_COUNT))
                 except Exception as excep:
                     # log error here
                     _LOGGER.error(

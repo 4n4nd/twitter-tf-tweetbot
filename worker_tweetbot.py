@@ -44,6 +44,7 @@ AUTH = OAuth1(
 TF_SERVER_URL = Configuration.TF_SERVER_URL
 
 CURRENT_USER_ID = None
+TWEET_REQUEST_COUNT = 0
 
 loop = asyncio.get_event_loop()
 
@@ -111,6 +112,9 @@ class MainHandler(tornado.web.RequestHandler):
                     await post_tweet_reply(tweet_id, reply_string)
                     end = time.time()
                     _LOGGER.debug("Request took %s seconds", str(end - start))
+                global TWEET_REQUEST_COUNT
+                TWEET_REQUEST_COUNT += 1
+                _LOGGER.info("Processed %s tweets", str(TWEET_REQUEST_COUNT))
 
         self.write(reply_string)
 
