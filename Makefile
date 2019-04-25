@@ -10,6 +10,7 @@ oc_deploy_master:
 		--param TWITTER_ACCESS_TOKEN="${MASTER_TWITTER_ACCESS_TOKEN}" \
 		--param TWITTER_ACCESS_TOKEN_SECRET="${MASTER_TWITTER_ACCESS_TOKEN_SECRET}" \
 		--param FLT_DEBUG_MODE="${FLT_DEBUG_MODE}" \
+		--param FLT_LOAD_TESTING_MODE="${FLT_LOAD_TESTING_MODE}" \
 		| oc apply -f -
 
 oc_deploy_chatbot_worker:
@@ -19,6 +20,7 @@ oc_deploy_chatbot_worker:
 		--param TWITTER_ACCESS_TOKEN="${CHATBOT_TWITTER_ACCESS_TOKEN}" \
 		--param TWITTER_ACCESS_TOKEN_SECRET="${CHATBOT_TWITTER_ACCESS_TOKEN_SECRET}" \
 		--param FLT_DEBUG_MODE="${FLT_DEBUG_MODE}" \
+		--param FLT_LOAD_TESTING_MODE="${FLT_LOAD_TESTING_MODE}" \
 		| oc apply -f -
 
 oc_deploy_tweetbot_worker:
@@ -28,6 +30,7 @@ oc_deploy_tweetbot_worker:
 		--param TWITTER_ACCESS_TOKEN="${TWEETBOT_TWITTER_ACCESS_TOKEN}" \
 		--param TWITTER_ACCESS_TOKEN_SECRET="${TWEETBOT_TWITTER_ACCESS_TOKEN_SECRET}" \
 		--param FLT_DEBUG_MODE="${FLT_DEBUG_MODE}" \
+		--param FLT_LOAD_TESTING_MODE="${FLT_LOAD_TESTING_MODE}" \
 		| oc apply -f -
 
 oc_deploy_tf_serving:
