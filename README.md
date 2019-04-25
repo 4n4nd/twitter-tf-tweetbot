@@ -6,7 +6,7 @@ This bot is divided into 4 different openshift deployments.
 * Twitter Tweetbot Workers
 * Twitter Master Workers
 
-Each of them is a separate deployment because that makes them individually scalable, so if more users are interacting with the chatbot (using direct messages), the the number of chatbot workers can be increased easily.
+Each of them is a separate deployment because that makes them individually scalable, so if more users are interacting with the chatbot (using direct messages), the number of chatbot workers can be increased easily.
 
 
 ## Deploy Openshift-acme
@@ -46,3 +46,16 @@ To deploy all of them, run:
 ## Delete all deployments
 
  `make oc_delete_all`
+
+## Load Testing your deployments
+To load test the deployments, we use [vegeta](https://github.com/tsenart/vegeta).
+
+** Before beginning to load test, set the env variable `FLT_LOAD_TESTING_MODE=True`, this will prevent the response to reach the twitter servers. This is important because if you send to many requests too fast to the twitter server, your app might get disabled by twitter
+
+In the load_test directory of this repo, you will see a fake_dm.json, targets.txt and vegeta_attack.sh.  
+* fake_dm.json is a dummy message that includes a url to an image which will be processed by the bot.
+* targets.txt includes the POST request configuration that vegeta will bombard the webhook with. This also points to the fake_dm.json as that json will act as the body for the POST request (Update the location for the json file before load testing).
+* vegeta_attack.sh is a very simple example script which shows how to attack the webhook with 10 requests per second and plot the latency graph for these requests in an html file (For more info go [here](https://github.com/tsenart/vegeta#plot-command)).
+
+An example latency plot would look like:
+![Sample Plot](https://raw.githubusercontent.com/4n4nd/twitter-tf-tweetbot/master/load_test/samplel_vegeta_plot.png)
