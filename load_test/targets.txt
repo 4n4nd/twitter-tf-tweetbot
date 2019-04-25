@@ -1,0 +1,3 @@
+POST https://twitterbot-master.openshifturl.com/webhook
+Content-Type: application/json; charset=utf-8
+@/location_of_fake_dm.json/fake_dm.json
