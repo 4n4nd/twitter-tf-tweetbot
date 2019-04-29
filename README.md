@@ -8,6 +8,8 @@ This bot is divided into 4 different openshift deployments.
 
 Each of them is a separate deployment because that makes them individually scalable, so if more users are interacting with the chatbot (using direct messages), the number of chatbot workers can be increased easily.
 
+Application Workflow Chart:
+![App Workflow](https://raw.githubusercontent.com/4n4nd/twitter-tf-tweetbot/master/src/tf_tweetbot_flowchart.jpg)
 
 ## Deploy Openshift-acme
 This will help with automatically getting CA certificates for your public routes.
