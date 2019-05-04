@@ -1,4 +1,5 @@
 import logging
+import os
 import requests
 import numpy as np
 from PIL import Image
@@ -53,10 +54,10 @@ def tf_request(server_url, image_url, auth=None, image_resolution: tuple = (300,
     response.raise_for_status()
 
     # Prediction response from the api
-    prediction_list = response.json()["predictions"][0]
+    prediction_value = 1 - response.json()["predictions"][0][0]
 
     # return the list of predictions
-    return prediction_list
+    return [prediction_value]
 
 
 def process_output(prediction_list: list):
@@ -67,8 +68,7 @@ def process_output(prediction_list: list):
     # find the index with the highest value of likelihood
     # max_index = prediction_list.index(max(prediction_list))
     # is_fedora = bool(max_index)
-    is_fedora = not bool(round(prediction_list[0]))
-
-    if is_fedora:
+    if prediction_list[0] > float(os.getenv("FLT_FEDORA_FOUND_THRESHOLD", "0.95")):
         return "I found a Red Hat Fedora!"
+
     return "No Red Hat Fedora found :("
