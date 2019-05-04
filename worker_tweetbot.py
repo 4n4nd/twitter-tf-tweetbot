@@ -97,6 +97,7 @@ class MainHandler(tornado.web.RequestHandler):
                 # process image and get response from tf model
                 prediction_list = tf_connect.tf_request(TF_SERVER_URL, image_url, AUTH)
                 reply_string = tf_connect.process_output(prediction_list)
+                reply_string = reply_string + " Likelihood:" + str(prediction_list[0])
                 _LOGGER.info(
                     " %s, Image:(%s), Reply %s",
                     tweet["user"]["screen_name"],
